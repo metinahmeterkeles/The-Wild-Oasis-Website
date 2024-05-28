@@ -1,0 +1,4 @@
+/node_modules
+/starter
+/.env.local
+/.next
