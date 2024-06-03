@@ -1,9 +1,12 @@
-import { Suspense } from "react";
-import CabinList from "../_components/CabinList";
-import Spinner from "../_components/Spinner";
+import { Suspense } from 'react';
+import CabinList from '../_components/CabinList';
+import Spinner from '../_components/Spinner';
+import { getCabins } from '../_lib/data-service';
+
+export const revalidate = 3600;
 
 export const metadata = {
-  title: "Cabins",
+  title: 'Cabins',
 };
 
 export default function Page() {
