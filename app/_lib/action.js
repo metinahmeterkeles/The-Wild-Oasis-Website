@@ -38,6 +38,8 @@ export async function deleteReservation(bookingID) {
   if (!guestIDs.includes(bookingID))
     throw new Error('You are not allowed to delete this booking');
 
+  // await new Promise((res) => setTimeout(res, 5000));
+
   const { error } = await supabase
     .from('bookings')
     .delete()
