@@ -1,6 +1,30 @@
+'use client';
+
+import { differenceInDays } from 'date-fns';
+import { useReservation } from './ReservationContext';
+import { createBooking } from '../_lib/action';
+import { useFormStatus } from 'react-dom';
+import SpinnerMini from './SpinnerMini';
+
 function ReservationForm({ cabin, user }) {
-  // CHANGE
-  const { maxCapacity } = cabin;
+  const { range, resetRange } = useReservation();
+  const { maxCapacity, regularPrice, discount, id } = cabin;
+
+  const startDate = range.from;
+  const endDate = range.to;
+
+  const numNights = differenceInDays(endDate, startDate);
+  const cabinPrice = numNights * (regularPrice - discount);
+
+  const bookingData = {
+    startDate,
+    endDate,
+    numNights,
+    cabinPrice,
+    cabinId: id,
+  };
+
+  const createBookingWithData = createBooking.bind(null, bookingData);
 
   return (
     <div className="scale-[1.01]">
@@ -19,7 +43,13 @@ function ReservationForm({ cabin, user }) {
         </div>
       </div>
 
-      <form className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col">
+      <form
+        action={async (formData) => {
+          await createBookingWithData(formData);
+          resetRange();
+        }}
+        className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col"
+      >
         <div className="space-y-2">
           <label htmlFor="numGuests">How many guests?</label>
           <select
@@ -54,9 +84,7 @@ function ReservationForm({ cabin, user }) {
         <div className="flex justify-end items-center gap-6">
           <p className="text-primary-300 text-base">Start by selecting dates</p>
 
-          <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-            Reserve now
-          </button>
+          <Button startDate={startDate} endDate={endDate} />
         </div>
       </form>
     </div>
@@ -64,3 +92,22 @@ function ReservationForm({ cabin, user }) {
 }
 
 export default ReservationForm;
+
+function Button({ startDate, endDate }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300"
+      disabled={!(startDate, endDate)}
+    >
+      {pending ? (
+        <span className="mx-auto">
+          <SpinnerMini />
+        </span>
+      ) : (
+        'Reserve now'
+      )}
+    </button>
+  );
+}
